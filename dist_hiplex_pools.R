@@ -14,7 +14,7 @@ start_column <- "start"          # Column name with the start position
 # Function to check chromosomal distances and exclude pairs within a specified distance
 exclude_close_pairs <- function(df, max_distance) {
   num_gRNAs <- nrow(df)
-  exclude_pairs <- matrix(FALSE, nrow=num_gRNAs, ncol=num_gRNAs)
+  excluded_pairs <- matrix(FALSE, nrow=num_gRNAs, ncol=num_gRNAs)
   
   chr   <- df[, chr_column]
   start <- df[, start_column]
@@ -23,12 +23,12 @@ exclude_close_pairs <- function(df, max_distance) {
   for (i in 1:(num_gRNAs - 1)) {
     for (j in (i + 1):num_gRNAs) {
       if (chr[i] == chr[j] & abs(start[i] - start[j]) < max_distance) {
-        exclude_pairs[i, j] <- exclude_pairs[j, i] <- TRUE
+        excluded_pairs[i, j] <- excluded_pairs[j, i] <- TRUE
       }
     }
   }
   
-  return(exclude_pairs)
+  return(excluded_pairs)
 }
 
 # Load the gRNA sequences from the CSV file
