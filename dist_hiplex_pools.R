@@ -35,15 +35,19 @@ exclude_close_pairs <- function(df, max_distance) {
 df <- read.csv(input_file)
 distance_matrix <- as.matrix(stringdist::stringdistmatrix(df[, sgRNA_column], method="hamming"))
 
-# Print the distance matrix
-pheatmap::pheatmap(distance_matrix, color=colorRampPalette(c("red", "white"))(max(nchar(df[, sgRNA_column]))))
-
 # Check chromosomal distances and exclude pairs within 10kb
 distance_matrix[exclude_close_pairs(df, 1e4)] <- 0
 
 # Distribute gRNAs using balanced distribution
 set.seed(666)
 df$pool <- anticlust::anticlustering(as.dist(distance_matrix), K, objective="distance")
+
+# Print one distance matrix per pool
+sapply(unique(df$pool), function(pool) {
+  i   <- which(df$pool == pool)
+  pal <- colorRampPalette(c("#F28E2B", "white", "#4E79A7"), bias=2)(max(c(10, nchar(df[, sgRNA_column]))))  # at least 10 breaks
+  print(pheatmap::pheatmap(distance_matrix[i, i], color=pal, fontsize=6, main=paste("Pool", pool)))
+})
 
 # Output the result
 l <- c(list(All_Pools=df), split(df, df$pool))
